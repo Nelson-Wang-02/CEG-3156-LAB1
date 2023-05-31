@@ -34,17 +34,17 @@ architecture rtl of binaryMultControlPath is
 		o_q, o_qBar	: OUT	STD_LOGIC);	
 	end component;
 	
-	signal o_s1, o_s2, o_s3, o_s4 : STD_LOGIC; 
-	signal no_s1, no_s2, no_s3, no_s4 : STD_LOGIC;
-	signal i_s1, i_s2, i_s3, i_s4 : STD_LOGIC;
+	signal o_s1, o_s2, o_s3, o_s4: STD_LOGIC; 
+	signal no_s1, no_s2, no_s3, no_s4: STD_LOGIC;
+	signal i_s1, i_s2, i_s3, i_s4: STD_LOGIC;
 	
 	begin 
 	
 	i_s1 <= (o_s1 and not(en_mult)) or (not(en_mult) and o_s4);
-	i_s2 <= (o_s1 and en_mult) or (not(z) and not(b0) and o_s2);
-	i_s3 <= (not(z) and b0 and o_s2) or (o_s3 and not(z) and b0);
-	i_s4 <= (z and o_s2) or (o_s4 and en_mult) or (o_s3 and z);
-	
+	i_s2 <= (o_s1 and b0 and en_mult) or (not(z) and b0 and o_s3);
+	i_s3 <= (not(z) and not(b0) and o_s3) or o_s2;
+	i_s4 <= (z and o_s3) or (o_s4 and en_mult);
+
 	s1: ARdFF_0
 		PORT MAP (
 			i_resetBar => i_resetBar,
@@ -78,10 +78,10 @@ architecture rtl of binaryMultControlPath is
 			o_qBar => no_s4);
 
 	--output drivers
-	shft_A <= o_s2 or o_s3; 
-	shft_B <= o_s2 or o_s3;
-	en_P <= o_s3 or o_s1; 
-	Psel <= o_s2 or o_s3;
-	loadReg <= o_s1 or o_s2 or o_s3;
+	shft_A <= o_s3; 
+	shft_B <= o_s3;
+	en_P <= o_s2 or o_s1;
+	Psel <= o_s2;
+	loadReg <= o_s1 or o_s3;
 			
 end rtl; 

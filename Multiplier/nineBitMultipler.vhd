@@ -38,7 +38,6 @@ architecture rtl of nineBitMultiplier is
 			--control signals
 			resetBar : IN STD_LOGIC; 
 			shft_A, shft_B : IN STD_LOGIC; 
-			en_mult : IN STD_LOGIC;
 			loadReg : IN STD_LOGIC;
 			Psel : IN STD_LOGIC;
 			en_P : IN STD_LOGIC;
@@ -87,7 +86,6 @@ architecture rtl of nineBitMultiplier is
 			resetBar => resetBar,
 			shft_A => o_shftA, 
 			shft_B => o_shftB,
-			en_mult => en_mult,
 			loadReg => o_loadReg,
 			Psel => o_Psel, 
 			en_P => o_enP, 
