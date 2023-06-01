@@ -34,16 +34,17 @@ architecture rtl of binaryMultControlPath is
 		o_q, o_qBar	: OUT	STD_LOGIC);	
 	end component;
 	
-	signal o_s1, o_s2, o_s3, o_s4: STD_LOGIC; 
-	signal no_s1, no_s2, no_s3, no_s4: STD_LOGIC;
-	signal i_s1, i_s2, i_s3, i_s4: STD_LOGIC;
+	signal o_s1, o_s2, o_s3, o_s4, o_s5 : STD_LOGIC; 
+	signal no_s1, no_s2, no_s3, no_s4, no_s5 : STD_LOGIC;
+	signal i_s1, i_s2, i_s3, i_s4, i_s5 : STD_LOGIC;
 	
 	begin 
 	
 	i_s1 <= (o_s1 and not(en_mult)) or (not(en_mult) and o_s4);
-	i_s2 <= (o_s1 and b0 and en_mult) or (not(z) and b0 and o_s3);
-	i_s3 <= (not(z) and not(b0) and o_s3) or o_s2;
-	i_s4 <= (z and o_s3) or (o_s4 and en_mult);
+	i_s2 <= (o_s1 and b0 and en_mult) or (z and b0 and o_s5);
+	i_s3 <= (z and not(b0) and o_s5) or o_s2 or (o_s1 and en_mult and not(b0));
+	i_s4 <= (not(z) and o_s5) or (o_s4 and en_mult);
+	i_s5 <= o_s3;
 
 	s1: ARdFF_0
 		PORT MAP (
@@ -76,7 +77,15 @@ architecture rtl of binaryMultControlPath is
 			i_clock => clk,		
 			o_q => o_s4, 
 			o_qBar => no_s4);
-
+			
+	s5: ARdFF 
+		PORT MAP(
+			i_resetBar => i_resetBar,
+			i_d => i_s5,		
+			i_clock => clk,		
+			o_q => o_s5, 
+			o_qBar => no_s5);
+			
 	--output drivers
 	shft_A <= o_s3; 
 	shft_B <= o_s3;

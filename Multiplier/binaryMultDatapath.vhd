@@ -64,16 +64,29 @@ architecture rtl of binaryMultDatapath is
 			o_Value			: OUT	STD_LOGIC_VECTOR(17 downto 0));	
 	end component; 
 
+	COMPONENT enARdFF_2 IS
+		PORT(
+			i_resetBar	: IN	STD_LOGIC;
+			i_d		: IN	STD_LOGIC;
+			i_enable	: IN	STD_LOGIC;
+			i_clock		: IN	STD_LOGIC;
+			o_q, o_qBar	: OUT	STD_LOGIC);
+	end COMPONENT;
+
 	signal s_regA, s_sum, s_product : STD_LOGIC_VECTOR(17 downto 0);
 	signal s_regB : STD_LOGIC_VECTOR(8 downto 0);
 	signal s_regP : STD_LOGIC_VECTOR(17 downto 0);
 	signal add_cout : STD_LOGIC;
+	signal o_Z, o_B0, not_z, not_b0 : STD_LOGIC;
+	signal i_Z : STD_LOGIC;
 	
 	begin 
 	
 	--change behavioural into structural if possible. 
 	with Psel select 
 		s_regP <= s_sum when '1', "000000000000000000" when others;
+	
+	i_Z <= (s_regB(8) or s_regB(7) or s_regB(6) or s_regB(5) or s_regB(4) or s_regB(3) or s_regB(2) or s_regB(1) or s_regB(0));
 	
 	regA: eighteenBitLeftShiftRegister 
 		port map (
@@ -108,11 +121,20 @@ architecture rtl of binaryMultDatapath is
 			i_clock => clk,			
 			i_Value => s_regP,			
 			o_Value =>	s_product);	
+		
+	regZ: enARdFF_2
+		PORT MAP(
+			i_resetBar => resetBar,
+			i_d => i_Z,
+			i_enable => '1',
+			i_clock => clk,
+			o_q => o_Z,
+			o_qBar => not_z);			
 
 	--output drivers		
 	
-	z <= not(s_regB(8) or s_regB(7) or s_regB(6) or s_regB(5) or s_regB(4) or s_regB(3) or s_regB(2) or s_regB(1) or s_regB(0));
-	b0 <= s_regB(0);
+	z <= o_Z; 
+	b0 <= s_regB(0);	
 	o_product <= s_product;
 
 end rtl;

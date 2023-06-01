@@ -40,7 +40,7 @@ architecture rtl of nineBitMultiplier is
 			shft_A, shft_B : IN STD_LOGIC; 
 			loadReg : IN STD_LOGIC;
 			Psel : IN STD_LOGIC;
-			en_P : IN STD_LOGIC;
+			en_P : IN STD_LOGIC;	
 			
 			--clock
 			clk : IN STD_LOGIC;
