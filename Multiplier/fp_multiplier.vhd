@@ -83,23 +83,21 @@ architecture rtl of fp_multiplier is
 	end component;
 
 	--Sign signals
-	signal o_signA, o_signB, o_sign : STD_LOGIC; 
-	signal not_signA, not_signB : STD_LOGIC;
+	signal o_sign : STD_LOGIC; 
 	
 	--Exponent signals
-	signal o_expA, o_expB : STD_LOGIC_VECTOR(6 downto 0);
+	--signal o_expA, o_expB : STD_LOGIC_VECTOR(6 downto 0);
 	signal o_expCout1, o_expCout0 : STD_LOGIC;
 	signal o_sum1 : STD_LOGIC_VECTOR(7 downto 0);
 	signal o_sum0 : STD_LOGIC_VECTOR(6 downto 0);
 	signal o_diff : STD_LOGIC_VECTOR(7 downto 0);
 	signal o_fDiff : STD_LOGIC_VECTOR(6 downto 0);
 	signal o_subCout : STD_LOGIC;
-	
 	signal o_muxOut1 : STD_LOGIC;
 	signal i_muxOut1 : STD_LOGIC_VECTOR(6 downto 0);
 	
 	signal int_mantA, int_mantB : STD_LOGIC_VECTOR(8 downto 0);
-	signal reg_mantA, reg_mantB : STD_LOGIC_VECTOR(8 downto 0);
+	--signal reg_mantA, reg_mantB : STD_LOGIC_VECTOR(8 downto 0);
 	signal prod_mant : STD_LOGIC_VECTOR(17 downto 0);
 	signal mux_mant1, mux_mant0 : STD_LOGIC_VECTOR(7 downto 0);
 	signal o_mant : STD_LOGIC_VECTOR(7 downto 0);
@@ -108,61 +106,26 @@ architecture rtl of fp_multiplier is
 	
 	--concurrent signal assignment 
 
-	o_sign <= o_signA xor o_signB; --sign bits
+	o_sign <= i_A(15) xor i_B(15); --sign bits
 	o_sum1(7) <= o_expCout1; 
 	
 	o_fDiff <= o_diff(6 downto 0); --only 7 bits needed from subtractor
 	
 	int_mantA <= '1' & i_A(7 downto 0); --include implicit 1
-	int_mantB <= '1' & i_A(7 downto 0);
+	int_mantB <= '1' & i_B(7 downto 0);
 	
 	i_muxOut1 <= "000000" & o_muxOut1;
 
 	mux_mant0 <= prod_mant(15 downto 8);
 	mux_mant1 <= prod_mant(16 downto 9);
 	
-	
-	-- sign registers
-	s1: enARdFF_2 
-		PORT MAP(
-			i_resetBar => GResetBar,
-			i_d => i_A(15),		
-			i_enable => en_mult,	
-			i_clock => GClock,		
-			o_q => o_signA, 
-			o_qBar => not_signA);	
-	
-	s0: enARdFF_2 
-		PORT MAP(
-			i_resetBar => GResetBar,
-			i_d => i_B(15),		
-			i_enable => en_mult,	
-			i_clock => GClock,		
-			o_q => o_signB, 
-			o_qBar => not_signB);
-	
 	--Exponent Operations
-	e1: sevenBitRegister 
-		port map(
-			i_resetBar => GResetBar,
-			i_load => en_mult,	
-			i_clock => GClock,		
-			i_Value => i_A(14 downto 8),			
-			o_Value => o_expA);
-	
-	e0: sevenBitRegister 
-		port map(
-			i_resetBar => GResetBar,
-			i_load => en_mult,	
-			i_clock => GClock,		
-			i_Value => i_B(14 downto 8),			
-			o_Value => o_expB);	
 			
 	addExp1: sevenBitAdder
 		PORT MAP(
 			i_Cin => '0', 	
-			i_Ai => o_expA, 
-			i_Bi => o_expB,
+			i_Ai => i_A(14 downto 8), 
+			i_Bi => i_B(14 downto 8),
 			o_CarryOut => o_expCout1,
 			o_Sum => o_sum1(6 downto 0));		
 			
@@ -189,29 +152,13 @@ architecture rtl of fp_multiplier is
 			i_out => o_muxOut1);
 			
 	--Mantissa Operations
-	
-	m1: nineBitRegister 
-		PORT MAP(
-			i_resetBar => GResetBar, 
-			i_load => en_mult, 
-			i_clock => GClock,
-			i_Value => int_mantA,
-			o_Value => reg_mantA);
-	
-	m0: nineBitRegister 
-		PORT MAP(
-			i_resetBar => GResetBar, 
-			i_load => en_mult, 
-			i_clock => GClock,
-			i_Value => int_mantB,
-			o_Value => reg_mantB);
 
 	mantMult: nineBitMultiplier
 		port map (
 			clock => GClock,
 			resetBar => GResetBar,
-			IN1 => reg_mantA, 
-			IN2 => reg_mantB,
+			IN1 => int_mantA, 
+			IN2 => int_mantB,
 			en_mult=> en_mult,
 			o_product => prod_mant);
 	
